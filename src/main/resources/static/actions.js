@@ -1,46 +1,125 @@
-// App State Inspirational Quotes and Fun Facts
-const appStateContent = [
-  "🏔️ Fun Fact: Appalachian State University sits at 3,333 feet above sea level in beautiful Boone, North Carolina!",
-  "💪 'Mountaineers are Always Free' - The spirit of independence runs deep in our Appalachian roots.",
-  "🌟 Did you know? App State has been recognized as one of the top public universities in the South!",
-  "🏈 Legendary Moment: The Mountaineers shocked Michigan 34-32 in 2007 - one of college football's greatest upsets!",
-  "📚 'Education is the most powerful weapon which you can use to change the world.' - Nelson Mandela",
-  "🌲 App State Fact: Our campus is home to over 290 species of birds - making it a birdwatcher's paradise!",
-  "⭐ 'Success is not final, failure is not fatal: it is the courage to continue that counts.' - Winston Churchill",
-  "🏔️ The Blue Ridge Mountains provide the perfect backdrop for both learning and adventure at App State!",
-  "💡 'The only way to do great work is to love what you do.' - Steve Jobs",
-  "🎓 App State Pride: We've graduated over 100,000 alumni who are making a difference worldwide!",
-  "🌟 'Believe you can and you're halfway there.' - Theodore Roosevelt",
-  "🏞️ Fun Fact: Grandfather Mountain, just 20 minutes from campus, is home to the famous Mile High Swinging Bridge!",
-  "📈 'Don't watch the clock; do what it does. Keep going.' - Sam Levenson",
-  "🏫 App State was founded in 1899 and has been fostering Mountaineer excellence for over 125 years!",
-  "🎯 'The future belongs to those who believe in the beauty of their dreams.' - Eleanor Roosevelt",
-  "❄️ Boone Fact: We're one of the few universities where you might need a winter coat in April!",
-  "🌱 Growth begins at the end of your comfort zone.",
-  "🏔️ App State's motto 'Esse Quam Videri' means 'To Be Rather Than To Seem' - authenticity matters here!",
-  "💎 'What lies behind us and what lies before us are tiny matters compared to what lies within us.' - Ralph Waldo Emerson",
-  "🎵 Did you know? Our fight song 'Hi Hi Yikas' has been energizing Mountaineers since the early 1900s!"
-];
+const SCHOOL_CONFIGS = {
+  appstate: {
+    name: 'Appalachian State University',
+    logoPath: 'images/AppStateLogo.png',
+    emailDomain: '@appstate.edu',
+    facts: [
+      'Boone sits high in the Blue Ridge Mountains at about 3,300 feet.',
+      'App State began in 1899 and is known for strong teaching programs.',
+      'The campus is close to outdoor trails, skiing, and mountain parks.',
+      'Boone weather can shift quickly, especially in late fall and spring.',
+      'The university motto is "Esse Quam Videri" or "To Be Rather Than To Seem".'
+    ]
+  },
+  unc: {
+    name: 'University of North Carolina at Chapel Hill',
+    logoPath: 'images/ChapelHillLogo.png',
+    emailDomain: '@unc.edu',
+    facts: [
+      'UNC-Chapel Hill is one of the oldest public universities in the U.S.',
+      'Chapel Hill is part of the Triangle with Raleigh and Durham.',
+      'The Research Triangle area is a major tech and biotech hub.',
+      'UNC has a long history in medicine, journalism, and public service.',
+      'The school is recognized for strong research and graduate programs.'
+    ]
+  },
+  ncsu: {
+    name: 'North Carolina State University',
+    logoPath: 'images/NCStateLogo.png',
+    emailDomain: '@ncsu.edu',
+    facts: [
+      'NC State is based in Raleigh, North Carolina\'s capital city.',
+      'The university is known for engineering, textiles, and design.',
+      'Centennial Campus connects academics with industry partners.',
+      'Raleigh offers a strong startup and technology job market.',
+      'NC State is one of the key schools in the Research Triangle.'
+    ]
+  },
+  duke: {
+    name: 'Duke University',
+    logoPath: 'images/DukeUniversityLogo.png',
+    emailDomain: '@duke.edu',
+    facts: [
+      'Duke is located in Durham, North Carolina.',
+      'The campus is known for Gothic architecture and Duke Chapel.',
+      'Durham has grown into a major city for health and startups.',
+      'Duke is widely known for medicine, law, and policy programs.',
+      'The university is part of the broader Triangle research ecosystem.'
+    ]
+  },
+  ecu: {
+    name: 'East Carolina University',
+    logoPath: 'images/EastCarolinaUniversityLogo.png',
+    emailDomain: '@ecu.edu',
+    facts: [
+      'East Carolina University is based in Greenville, North Carolina.',
+      'ECU has a strong regional role in health and teacher education.',
+      'Greenville is one of the larger economic centers in eastern NC.',
+      'The university serves a broad student population across the state.',
+      'ECU health programs support many communities in eastern North Carolina.'
+    ]
+  }
+};
 
-// Footer content management
-class AppStateFooter {
-  constructor() {
-    this.quotes = appStateContent;
-    this.currentIndex = 0;
-    this.displayDuration = 10000; // 10 seconds 
-    this.fadeTime = 500; // 0.5 seconds for fade transition
+const SCHOOL_NAME_TO_KEY = {
+  'appalachian state university': 'appstate',
+  'university of north carolina at chapel hill': 'unc',
+  'north carolina state university': 'ncsu',
+  'duke university': 'duke',
+  'east carolina university': 'ecu'
+};
+const SCHOOL_CHOICES = Object.entries(SCHOOL_CONFIGS).map(([key, config]) => ({
+  key,
+  name: config.name
+}));
+
+function getQueryParams() {
+  return new URLSearchParams(window.location.search);
+}
+
+function getSchoolFromQuery() {
+  const school = getQueryParams().get('school');
+  if (!school) {
+    return null;
   }
 
-  // Initialize the footer with dynamic content
+  return SCHOOL_CONFIGS[school] ? school : null;
+}
+
+function getSelectedSchoolKey() {
+  const schoolFromQuery = getSchoolFromQuery();
+  if (schoolFromQuery) {
+    window.localStorage.setItem('selectedSchool', schoolFromQuery);
+    return schoolFromQuery;
+  }
+
+  const storedSchool = window.localStorage.getItem('selectedSchool');
+  if (storedSchool && SCHOOL_CONFIGS[storedSchool]) {
+    return storedSchool;
+  }
+
+  return 'appstate';
+}
+
+function getSchoolConfig(schoolKey) {
+  return SCHOOL_CONFIGS[schoolKey] || SCHOOL_CONFIGS.appstate;
+}
+
+class SchoolFooter {
+  constructor(facts) {
+    this.facts = facts;
+    this.currentIndex = 0;
+    this.displayDuration = 10000;
+    this.fadeTime = 500;
+  }
+
   initialize(footerElement) {
     if (!footerElement) {
-      console.error('Footer element not found');
       return;
     }
 
-    // Create the dynamic content container
     const contentContainer = document.createElement('div');
-    contentContainer.id = 'app-state-content';
+    contentContainer.id = 'school-content';
     contentContainer.style.cssText = `
       transition: opacity ${this.fadeTime}ms ease-in-out;
       min-height: 50px;
@@ -53,53 +132,223 @@ class AppStateFooter {
       color: #666;
     `;
 
-    // Replace footer content
     footerElement.innerHTML = '';
     footerElement.appendChild(contentContainer);
-
-    // Start the rotation
     this.showContent(contentContainer);
     this.startRotation(contentContainer);
   }
 
-  // Display current content
   showContent(container) {
-    container.textContent = this.quotes[this.currentIndex];
+    container.textContent = this.facts[this.currentIndex];
     container.style.opacity = '1';
   }
 
-  // Start the automatic rotation
   startRotation(container) {
+    if (!this.facts.length) {
+      return;
+    }
+
     setInterval(() => {
-      // Fade out
       container.style.opacity = '0';
-      
       setTimeout(() => {
-        // Change content
-        this.currentIndex = (this.currentIndex + 1) % this.quotes.length;
+        this.currentIndex = (this.currentIndex + 1) % this.facts.length;
         this.showContent(container);
       }, this.fadeTime);
     }, this.displayDuration);
   }
 }
 
-// Global initialization function
-function initializeAppStateFooter() {
+function initializeSchoolFooter() {
+  const onSchoolSelectorPage = document.querySelector('#school-select-form');
+  if (onSchoolSelectorPage) {
+    const selectorFooter = document.querySelector('footer');
+    if (selectorFooter) {
+      selectorFooter.innerHTML = '';
+    }
+    return;
+  }
+
   const footer = document.querySelector('footer');
-  if (footer) {
-    const appFooter = new AppStateFooter();
-    appFooter.initialize(footer);
+  if (!footer) {
+    return;
+  }
+
+  const schoolKey = getSelectedSchoolKey();
+  const schoolConfig = getSchoolConfig(schoolKey);
+  const schoolFooter = new SchoolFooter(schoolConfig.facts);
+  schoolFooter.initialize(footer);
+}
+
+function initializeSchoolSelectorPage() {
+  const schoolSelectForm = document.querySelector('#school-select-form');
+  if (!schoolSelectForm) {
+    return;
+  }
+
+  const schoolInput = document.querySelector('#school-search');
+  const resultsContainer = document.querySelector('#school-search-results');
+  const errorLabel = document.querySelector('#school-select-error');
+  const wrapper = document.querySelector('.school-search-wrapper');
+  const queryError = getQueryParams().get('error');
+  let selectedSchoolKey = null;
+
+  if (queryError === 'auth' && errorLabel) {
+    errorLabel.textContent = 'Please choose your university and sign in first.';
+  }
+
+  const hideResults = () => {
+    if (resultsContainer) {
+      resultsContainer.classList.remove('visible');
+    }
+  };
+
+  const findMatches = (value) => {
+    const normalized = value.trim().toLowerCase();
+    if (!normalized) {
+      return [];
+    }
+
+    return SCHOOL_CHOICES.filter((school) => school.name.toLowerCase().startsWith(normalized));
+  };
+
+  const findExactSchoolKey = (value) => {
+    const normalized = value.trim().toLowerCase();
+    if (!normalized) {
+      return null;
+    }
+
+    return SCHOOL_NAME_TO_KEY[normalized] || null;
+  };
+
+  const renderResults = (value, showAll) => {
+    if (!resultsContainer) {
+      return;
+    }
+
+    const normalized = value.trim().toLowerCase();
+    if (!showAll && !normalized) {
+      hideResults();
+      return;
+    }
+
+    const matches = showAll ? SCHOOL_CHOICES : findMatches(value);
+    resultsContainer.innerHTML = '';
+
+    if (!matches.length) {
+      const emptyState = document.createElement('div');
+      emptyState.className = 'school-search-empty';
+      emptyState.textContent = 'No matching school found';
+      resultsContainer.appendChild(emptyState);
+      resultsContainer.classList.add('visible');
+      return;
+    }
+
+    matches.forEach((school) => {
+      const optionButton = document.createElement('button');
+      optionButton.type = 'button';
+      optionButton.className = 'school-search-option';
+      optionButton.textContent = school.name;
+      optionButton.dataset.schoolKey = school.key;
+      optionButton.addEventListener('click', function() {
+        schoolInput.value = school.name;
+        selectedSchoolKey = school.key;
+        if (errorLabel) {
+          errorLabel.textContent = '';
+        }
+        hideResults();
+      });
+      resultsContainer.appendChild(optionButton);
+    });
+
+    resultsContainer.classList.add('visible');
+  };
+
+  schoolInput.addEventListener('focus', function() {
+    renderResults(schoolInput.value, !schoolInput.value.trim());
+  });
+
+  schoolInput.addEventListener('input', function() {
+    selectedSchoolKey = findExactSchoolKey(schoolInput.value);
+    renderResults(schoolInput.value, false);
+    if (errorLabel) {
+      errorLabel.textContent = '';
+    }
+  });
+
+  document.addEventListener('click', function(event) {
+    if (wrapper && wrapper.contains(event.target)) {
+      return;
+    }
+    hideResults();
+  });
+
+  schoolSelectForm.addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    const enteredValue = schoolInput.value.trim().toLowerCase();
+    const exactSchoolKey = selectedSchoolKey || SCHOOL_NAME_TO_KEY[enteredValue];
+    const matches = findMatches(schoolInput.value);
+    const schoolKey = exactSchoolKey || (matches.length === 1 ? matches[0].key : null);
+
+    if (!schoolKey) {
+      if (errorLabel) {
+        errorLabel.textContent = 'Select one of the listed universities.';
+      }
+      renderResults(schoolInput.value, !schoolInput.value.trim());
+      return;
+    }
+
+    window.localStorage.setItem('selectedSchool', schoolKey);
+    window.location.href = `/SO_SignOnPage.html?school=${schoolKey}`;
+  });
+}
+
+function applySchoolBranding() {
+  const schoolKey = getSelectedSchoolKey();
+  const schoolConfig = getSchoolConfig(schoolKey);
+
+  const loginTitle = document.querySelector('#school-login-title');
+  if (loginTitle) {
+    loginTitle.textContent = `Welcome to ${schoolConfig.name} StudyOver`;
+  }
+
+  const signupTitle = document.querySelector('#school-signup-title');
+  if (signupTitle) {
+    signupTitle.textContent = `Create Your ${schoolConfig.name} StudyOver Account`;
+  }
+
+  const loginLogo = document.querySelector('#school-login-logo');
+  if (loginLogo) {
+    loginLogo.src = schoolConfig.logoPath;
+    loginLogo.alt = `${schoolConfig.name} logo`;
+  }
+
+  const signupLogo = document.querySelector('#school-signup-logo');
+  if (signupLogo) {
+    signupLogo.src = schoolConfig.logoPath;
+    signupLogo.alt = `${schoolConfig.name} logo`;
+  }
+
+  const loginSchool = document.querySelector('#login-school');
+  if (loginSchool) {
+    loginSchool.value = schoolKey;
+  }
+
+  const signupSchool = document.querySelector('#signup-school');
+  if (signupSchool) {
+    signupSchool.value = schoolKey;
   }
 }
 
 // H1 Navigation functionality
 function initializeH1Navigation() {
   const h1Element = document.querySelector('header h1');
-  if (h1Element) {
+  const onSignInPage = document.querySelector('.login-form');
+  if (h1Element && !onSignInPage) {
     // Add cursor pointer style and hover effect
     h1Element.style.cursor = 'pointer';
     h1Element.classList.add('universal-hover');
-    
+
     // Add click event listener to redirect to dashboard
     h1Element.addEventListener('click', function() {
       window.location.href = 'SO_DashBoard.html';
@@ -123,10 +372,10 @@ function initializeHeaderNavigation() {
             window.location.href = 'SO_YourSessions.html';
             break;
           case 'Browse Sessions':
-            window.location.href = 'SO_BrowseSessions.html';
+            window.location.href = '/browse-sessions';
             break;
           case 'Create Post':
-            window.location.href = 'SO_CreateNewPost.html';
+            window.location.href = '/create-post';
             break;
           default:
             console.log('Unknown header section clicked:', text);
@@ -138,20 +387,27 @@ function initializeHeaderNavigation() {
 
 // Login form functionality
 function initializeLoginForm() {
-  const loginForm = document.querySelector('.login-form');
+  const loginForm = document.querySelector('form.login-form[action="/login"]');
   const errorLabel = document.querySelector('#login-error');
+  const schoolKey = getSelectedSchoolKey();
+  const schoolConfig = getSchoolConfig(schoolKey);
 
-  const showError = (message) => {
+  const showError = (message, color) => {
     if (errorLabel) {
       errorLabel.textContent = message;
+      errorLabel.style.color = color || '#b00020';
     }
   };
 
   const queryError = new URLSearchParams(window.location.search).get('error');
   if (queryError === 'domain') {
-    showError('Only @appstate.edu emails are allowed');
+    showError(`Please use your ${schoolConfig.emailDomain} school email.`);
   } else if (queryError === 'missing') {
     showError('Please enter both username and password');
+  } else if (queryError === 'auth') {
+    showError('Please log in with your school email to access this page.');
+  } else if (new URLSearchParams(window.location.search).get('signup') === 'success') {
+    showError('Sign up complete. Please log in.', '#1b5e20');
   }
 
   if (loginForm) {
@@ -167,14 +423,102 @@ function initializeLoginForm() {
         return;
       }
 
-      // Check if username ends with @appstate.edu (case insensitive)
-      if (!username.toLowerCase().endsWith('@appstate.edu')) {
+      if (!username.toLowerCase().endsWith(schoolConfig.emailDomain)) {
         e.preventDefault();
-        showError('Username must end with @appstate.edu');
+        showError(`Email must end with ${schoolConfig.emailDomain}`);
         return;
       }
     });
   }
+}
+
+function initializeSignupActions() {
+  const schoolKey = getSelectedSchoolKey();
+  const schoolConfig = getSchoolConfig(schoolKey);
+  const goToSchoolSelector = () => {
+    window.localStorage.removeItem('selectedSchool');
+    window.location.href = '/SO_SelectSchoolPage.html';
+  };
+
+  const signUpButton = document.querySelector('#sign-up-button');
+  if (signUpButton) {
+    signUpButton.addEventListener('click', function() {
+      window.location.href = `/signup?school=${schoolKey}`;
+    });
+  }
+
+  const backToLoginButton = document.querySelector('#back-to-login-button');
+  if (backToLoginButton) {
+    backToLoginButton.addEventListener('click', function() {
+      window.location.href = `/SO_SignOnPage.html?school=${schoolKey}`;
+    });
+  }
+
+  const changeSchoolButton = document.querySelector('#change-school-button');
+  if (changeSchoolButton) {
+    changeSchoolButton.addEventListener('click', goToSchoolSelector);
+  }
+
+  const changeSchoolButtonSignup = document.querySelector('#change-school-button-signup');
+  if (changeSchoolButtonSignup) {
+    changeSchoolButtonSignup.addEventListener('click', goToSchoolSelector);
+  }
+
+  const signupForm = document.querySelector('#signup-form');
+  const signupError = document.querySelector('#signup-error');
+  if (!signupForm || !signupError) {
+    return;
+  }
+
+  const showSignupError = (message) => {
+    signupError.textContent = message;
+    signupError.style.color = '#b00020';
+  };
+
+  const signupStatus = new URLSearchParams(window.location.search).get('error');
+  if (signupStatus === 'domain') {
+    showSignupError(`Use a valid ${schoolConfig.emailDomain} email.`);
+  } else if (signupStatus === 'mismatch') {
+    showSignupError('Passwords do not match.');
+  } else if (signupStatus === 'missing') {
+    showSignupError('Please complete all required fields.');
+  }
+
+  signupForm.addEventListener('submit', function(event) {
+    const school = document.querySelector('#signup-school').value;
+    const firstName = document.querySelector('#signup-first-name').value.trim();
+    const lastName = document.querySelector('#signup-last-name').value.trim();
+    const email = document.querySelector('#signup-email').value.trim();
+    const password = document.querySelector('#signup-password').value;
+    const confirmPassword = document.querySelector('#signup-confirm-password').value;
+    const status = document.querySelector('#signup-status').value;
+    const gradYear = document.querySelector('#signup-grad-year').value.trim();
+    const birthday = document.querySelector('#signup-birthday').value;
+    const gender = document.querySelector('#signup-gender').value;
+
+    if (!school || !firstName || !lastName || !status || !gradYear || !birthday || !gender) {
+      event.preventDefault();
+      showSignupError('Please complete all required fields.');
+      return;
+    }
+
+    if (!email.toLowerCase().endsWith(getSchoolConfig(school).emailDomain)) {
+      event.preventDefault();
+      showSignupError(`Use a valid ${getSchoolConfig(school).emailDomain} email.`);
+      return;
+    }
+
+    if (!password || !confirmPassword) {
+      event.preventDefault();
+      showSignupError('Please complete all required fields.');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      event.preventDefault();
+      showSignupError('Passwords do not match.');
+    }
+  });
 }
 
 function initializeJoinSessionButtons() {
@@ -190,7 +534,7 @@ function initializeJoinSessionButtons() {
 
     button.dataset.joinBound = 'true';
     button.addEventListener('click', function() {
-      window.location.href = 'SO_RSVPConfrimation.html';
+      window.location.href = '/join-session';
     });
   });
 }
@@ -366,7 +710,7 @@ function initializeCreatePostForm() {
         return;
       }
 
-      window.location.href = 'SO_BrowseSessions.html';
+      window.location.href = '/browse-sessions';
     } catch (error) {
       console.error('Unable to create session:', error);
       alert('Unable to create session right now. Try again.');
@@ -380,23 +724,26 @@ function initializeDashboardButtons() {
 
   if (createPostCard) {
     createPostCard.addEventListener('click', function() {
-      window.location.href = 'SO_CreateNewPost.html';
+      window.location.href = '/create-post';
     });
   }
 
   if (browseSessionsCard) {
     browseSessionsCard.addEventListener('click', function() {
-      window.location.href = 'SO_BrowseSessions.html';
+      window.location.href = '/browse-sessions';
     });
   }
 }
 
 // Auto-initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-  initializeAppStateFooter();
+  initializeSchoolSelectorPage();
+  applySchoolBranding();
+  initializeSchoolFooter();
   initializeH1Navigation();
   initializeHeaderNavigation();
   initializeLoginForm();
+  initializeSignupActions();
   initializeJoinSessionButtons();
   initializeDashboardButtons();
   initializeCreatePostForm();

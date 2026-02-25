@@ -405,6 +405,83 @@ footer {
   width: 300px;
 }
 
+.signup-form {
+  width: 360px;
+}
+
+.login-logo {
+  width: 130px;
+  height: auto;
+  margin: 0 auto 4px auto;
+}
+
+.school-select-title {
+  text-align: center;
+  color: #333333;
+  font-size: clamp(2.8rem, 6vw, 4.5rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin: 0 0 8px 0;
+}
+
+.school-search-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.school-search-input {
+  width: 100%;
+  display: block;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.school-search-results {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background-color: #ffffff;
+  border: 1px solid #cfcfcf;
+  border-radius: 10px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  display: none;
+  z-index: 40;
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.school-search-results.visible {
+  display: block;
+}
+
+.school-search-option {
+  display: block;
+  width: 100%;
+  border: none;
+  background: #ffffff;
+  text-align: left;
+  padding: 12px 14px;
+  color: #2d2d2d;
+  font-size: 15px;
+  cursor: pointer;
+  border-bottom: 1px solid #efefef;
+}
+
+.school-search-option:last-child {
+  border-bottom: none;
+}
+
+.school-search-option:hover {
+  background: #f4f6f8;
+}
+
+.school-search-empty {
+  padding: 12px 14px;
+  color: #666666;
+  font-size: 14px;
+}
+
 .login-subtitle {
   text-align: center;
   color: #666;
@@ -433,13 +510,16 @@ footer {
   border-color: #333333;
 }
 
-.login-button {
+.login-button,
+.signup-button {
+  width: 100%;
   padding: 15px;
   background-color: #333333;
   color: #f5f5dc;
   border: none;
   border-radius: 8px;
   font-size: 16px;
+  position: relative;
 }
 
 /* ==============================================

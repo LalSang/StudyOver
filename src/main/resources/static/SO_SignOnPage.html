@@ -9,14 +9,19 @@
   </head>
   <body>
     <header>
-      <h1>Welcome to Appalachian State StudyOver</h1>
+      <h1 id="school-login-title">Welcome to StudyOver</h1>
     </header>
 
     <main>
       <div class="login-container">
         <form class="login-form" action="/login" method="post">
-          <p class="login-subtitle">Please use your university credentials</p>
-          <p id="login-error" class="login-error" aria-live="polite"></p>
+          <input type="hidden" id="login-school" name="school" value="appstate" />
+          <img
+            id="school-login-logo"
+            src="images/AppStateLogo.png"
+            alt="University logo"
+            class="login-logo"
+          />
           <input
             type="text"
             id="username"
@@ -38,6 +43,21 @@
           >
             Login
           </button>
+          <button
+            id="sign-up-button"
+            type="button"
+            class="signup-button universal-hover poppins-font"
+          >
+            Sign Up
+          </button>
+          <button
+            id="change-school-button"
+            type="button"
+            class="signup-button universal-hover poppins-font"
+          >
+            Change School
+          </button>
+          <p id="login-error" class="login-error" aria-live="polite"></p>
         </form>
       </div>
     </main>

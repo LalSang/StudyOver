@@ -2,6 +2,7 @@ package com.Capstone.capstonebackend;
 
 import java.util.List;
 import java.util.Map;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -28,22 +29,73 @@ public class HomeController {
     // landing page
     @GetMapping("/")
     public String index() {
-        return "redirect:/SO_SignOnPage.html";
+        return "redirect:/SO_SelectSchoolPage.html";
     }
 
     @PostMapping("/login")
     public String login(
+            @RequestParam String school,
             @RequestParam String username,
-            @RequestParam String password) {
+            @RequestParam String password,
+            HttpSession session) {
         if (password == null || password.isBlank()) {
-            return "redirect:/SO_SignOnPage.html?error=missing";
+            return "redirect:/SO_SignOnPage.html?school=" + school + "&error=missing";
         }
 
-        if (!authProvider.isValidAppStateUser(username)) {
-            return "redirect:/SO_SignOnPage.html?error=domain";
+        if (!authProvider.isValidSchoolUser(username, school)) {
+            return "redirect:/SO_SignOnPage.html?school=" + school + "&error=domain";
         }
 
+        session.setAttribute("authenticated", true);
+        session.setAttribute("userEmail", username.trim().toLowerCase());
+        session.setAttribute("school", school.trim().toLowerCase());
         return "redirect:/SO_DashBoard.html";
+    }
+
+    @GetMapping("/signup")
+    public String signupPage(@RequestParam(required = false) String school) {
+        if (isBlank(school)) {
+            return "redirect:/SO_SignUpPage.html";
+        }
+
+        return "redirect:/SO_SignUpPage.html?school=" + school;
+    }
+
+    @PostMapping("/signup")
+    public String signup(
+            @RequestParam String school,
+            @RequestParam String firstName,
+            @RequestParam String lastName,
+            @RequestParam String email,
+            @RequestParam String password,
+            @RequestParam String status,
+            @RequestParam String gradYear,
+            @RequestParam String birthday,
+            @RequestParam String gender,
+            @RequestParam String confirmPassword) {
+        if (isBlank(school)
+                || isBlank(firstName)
+                || isBlank(lastName)
+                || isBlank(status)
+                || isBlank(gradYear)
+                || isBlank(birthday)
+                || isBlank(gender)) {
+            return "redirect:/SO_SignUpPage.html?school=" + school + "&error=missing";
+        }
+
+        if (password == null || password.isBlank() || confirmPassword == null || confirmPassword.isBlank()) {
+            return "redirect:/SO_SignUpPage.html?school=" + school + "&error=missing";
+        }
+
+        if (!password.equals(confirmPassword)) {
+            return "redirect:/SO_SignUpPage.html?school=" + school + "&error=mismatch";
+        }
+
+        if (!authProvider.isValidSchoolUser(email, school)) {
+            return "redirect:/SO_SignUpPage.html?school=" + school + "&error=domain";
+        }
+
+        return "redirect:/SO_SignOnPage.html?school=" + school + "&signup=success";
     }
 
     @GetMapping("/join-session")
