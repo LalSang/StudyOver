@@ -15,6 +15,7 @@ public class AuthSessionFilter extends OncePerRequestFilter {
     private static final Set<String> PUBLIC_PATHS = Set.of(
             "/",
             "/login",
+            "/logout",
             "/signup",
             "/SO_SelectSchoolPage.html",
             "/SO_SignOnPage.html",

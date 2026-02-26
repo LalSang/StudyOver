@@ -415,6 +415,14 @@ footer {
   margin: 0 auto 4px auto;
 }
 
+.login-logo.logo-ncsu {
+  width: 180px;
+}
+
+.login-logo.logo-ecu {
+  width: 200px;
+}
+
 .school-select-title {
   text-align: center;
   color: #333333;
