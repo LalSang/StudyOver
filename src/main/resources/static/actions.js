@@ -306,6 +306,7 @@ function initializeSchoolSelectorPage() {
 function applySchoolBranding() {
   const schoolKey = getSelectedSchoolKey();
   const schoolConfig = getSchoolConfig(schoolKey);
+  const schoolTitle = `${schoolConfig.name} StudyOver`;
 
   const loginTitle = document.querySelector('#school-login-title');
   if (loginTitle) {
@@ -321,12 +322,16 @@ function applySchoolBranding() {
   if (loginLogo) {
     loginLogo.src = schoolConfig.logoPath;
     loginLogo.alt = `${schoolConfig.name} logo`;
+    loginLogo.classList.toggle('logo-ncsu', schoolKey === 'ncsu');
+    loginLogo.classList.toggle('logo-ecu', schoolKey === 'ecu');
   }
 
   const signupLogo = document.querySelector('#school-signup-logo');
   if (signupLogo) {
     signupLogo.src = schoolConfig.logoPath;
     signupLogo.alt = `${schoolConfig.name} logo`;
+    signupLogo.classList.toggle('logo-ncsu', schoolKey === 'ncsu');
+    signupLogo.classList.toggle('logo-ecu', schoolKey === 'ecu');
   }
 
   const loginSchool = document.querySelector('#login-school');
@@ -337,6 +342,32 @@ function applySchoolBranding() {
   const signupSchool = document.querySelector('#signup-school');
   if (signupSchool) {
     signupSchool.value = schoolKey;
+  }
+
+  const appHeaders = document.querySelectorAll('header h1:not(#school-login-title):not(#school-signup-title)');
+  appHeaders.forEach((header) => {
+    header.textContent = schoolTitle;
+  });
+
+  const officialSchoolInfoHeading = document.querySelector('.account-info-section h5');
+  if (officialSchoolInfoHeading) {
+    const badge = officialSchoolInfoHeading.querySelector('.readonly-badge');
+    officialSchoolInfoHeading.textContent = `Official ${schoolConfig.name} Information`;
+    if (badge) {
+      officialSchoolInfoHeading.appendChild(document.createTextNode(' '));
+      officialSchoolInfoHeading.appendChild(badge);
+    }
+  }
+
+  const schoolEmailLabel = document.querySelector('label[for="app-state-email"]');
+  if (schoolEmailLabel) {
+    schoolEmailLabel.textContent = `${schoolConfig.name} Email`;
+  }
+
+  const schoolEmailInput = document.querySelector('#app-state-email');
+  if (schoolEmailInput && /@appstate\.edu$/i.test(schoolEmailInput.value)) {
+    const username = schoolEmailInput.value.split('@')[0] || 'student';
+    schoolEmailInput.value = `${username}${schoolConfig.emailDomain}`;
   }
 }
 
@@ -440,13 +471,6 @@ function initializeSignupActions() {
     window.location.href = '/SO_SelectSchoolPage.html';
   };
 
-  const signUpButton = document.querySelector('#sign-up-button');
-  if (signUpButton) {
-    signUpButton.addEventListener('click', function() {
-      window.location.href = `/signup?school=${schoolKey}`;
-    });
-  }
-
   const backToLoginButton = document.querySelector('#back-to-login-button');
   if (backToLoginButton) {
     backToLoginButton.addEventListener('click', function() {
@@ -518,6 +542,19 @@ function initializeSignupActions() {
       event.preventDefault();
       showSignupError('Passwords do not match.');
     }
+  });
+}
+
+function initializeLogoutButtons() {
+  const logoutButtons = document.querySelectorAll('.logout-btn');
+  if (!logoutButtons.length) {
+    return;
+  }
+
+  logoutButtons.forEach((button) => {
+    button.addEventListener('click', function() {
+      window.location.href = '/logout';
+    });
   });
 }
 
@@ -744,6 +781,7 @@ document.addEventListener('DOMContentLoaded', function() {
   initializeHeaderNavigation();
   initializeLoginForm();
   initializeSignupActions();
+  initializeLogoutButtons();
   initializeJoinSessionButtons();
   initializeDashboardButtons();
   initializeCreatePostForm();

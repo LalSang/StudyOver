@@ -2,6 +2,7 @@ package com.Capstone.capstonebackend;
 
 import java.util.List;
 import java.util.Map;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -49,7 +50,23 @@ public class HomeController {
         session.setAttribute("authenticated", true);
         session.setAttribute("userEmail", username.trim().toLowerCase());
         session.setAttribute("school", school.trim().toLowerCase());
-        return "redirect:/SO_DashBoard.html";
+        return "redirect:/SO_DashBoard.html?school=" + school.trim().toLowerCase();
+    }
+
+    @GetMapping("/logout")
+    public String logout(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        String school = "appstate";
+
+        if (session != null) {
+            Object schoolAttribute = session.getAttribute("school");
+            if (schoolAttribute != null && !schoolAttribute.toString().trim().isEmpty()) {
+                school = schoolAttribute.toString().trim().toLowerCase();
+            }
+            session.invalidate();
+        }
+
+        return "redirect:/SO_SignOnPage.html?school=" + school;
     }
 
     @GetMapping("/signup")
