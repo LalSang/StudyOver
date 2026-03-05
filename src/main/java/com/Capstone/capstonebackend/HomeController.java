@@ -2,6 +2,7 @@ package com.Capstone.capstonebackend;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
@@ -20,67 +21,62 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class HomeController {
 
     private final AppstateAuthProvider authProvider;
+    private final DatabaseAuthService databaseAuthService;
     private final StudySessionService studySessionService;
 
-    public HomeController(AppstateAuthProvider authProvider, StudySessionService studySessionService) {
+    public HomeController(
+            AppstateAuthProvider authProvider,
+            DatabaseAuthService databaseAuthService,
+            StudySessionService studySessionService) {
         this.authProvider = authProvider;
+        this.databaseAuthService = databaseAuthService;
         this.studySessionService = studySessionService;
     }
 
     // landing page
     @GetMapping("/")
     public String index() {
-        return "redirect:/SO_SelectSchoolPage.html";
+        return "redirect:/SO_SignOnPage.html";
     }
 
     @PostMapping("/login")
     public String login(
-            @RequestParam String school,
             @RequestParam String username,
             @RequestParam String password,
             HttpSession session) {
-        if (password == null || password.isBlank()) {
-            return "redirect:/SO_SignOnPage.html?school=" + school + "&error=missing";
+        if (isBlank(username) || isBlank(password)) {
+            return "redirect:/SO_SignOnPage.html?error=missing";
         }
 
-        if (!authProvider.isValidSchoolUser(username, school)) {
-            return "redirect:/SO_SignOnPage.html?school=" + school + "&error=domain";
+        Optional<String> userRole = databaseAuthService.authenticate(username, password);
+        if (userRole.isEmpty()) {
+            return "redirect:/SO_SignOnPage.html?error=invalid";
         }
 
         session.setAttribute("authenticated", true);
-        session.setAttribute("userEmail", username.trim().toLowerCase());
-        session.setAttribute("school", school.trim().toLowerCase());
-        return "redirect:/SO_DashBoard.html?school=" + school.trim().toLowerCase();
+        session.setAttribute("userEmail", username.trim());
+        session.setAttribute("userRole", userRole.get());
+        return "redirect:/SO_DashBoard.html";
     }
 
     @GetMapping("/logout")
     public String logout(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
-        String school = "appstate";
 
         if (session != null) {
-            Object schoolAttribute = session.getAttribute("school");
-            if (schoolAttribute != null && !schoolAttribute.toString().trim().isEmpty()) {
-                school = schoolAttribute.toString().trim().toLowerCase();
-            }
             session.invalidate();
         }
 
-        return "redirect:/SO_SignOnPage.html?school=" + school;
+        return "redirect:/SO_SignOnPage.html";
     }
 
     @GetMapping("/signup")
-    public String signupPage(@RequestParam(required = false) String school) {
-        if (isBlank(school)) {
-            return "redirect:/SO_SignUpPage.html";
-        }
-
-        return "redirect:/SO_SignUpPage.html?school=" + school;
+    public String signupPage() {
+        return "redirect:/SO_SignUpPage.html";
     }
 
     @PostMapping("/signup")
     public String signup(
-            @RequestParam String school,
             @RequestParam String firstName,
             @RequestParam String lastName,
             @RequestParam String email,
@@ -90,29 +86,28 @@ public class HomeController {
             @RequestParam String birthday,
             @RequestParam String gender,
             @RequestParam String confirmPassword) {
-        if (isBlank(school)
-                || isBlank(firstName)
+        if (isBlank(firstName)
                 || isBlank(lastName)
                 || isBlank(status)
                 || isBlank(gradYear)
                 || isBlank(birthday)
                 || isBlank(gender)) {
-            return "redirect:/SO_SignUpPage.html?school=" + school + "&error=missing";
+            return "redirect:/SO_SignUpPage.html?error=missing";
         }
 
         if (password == null || password.isBlank() || confirmPassword == null || confirmPassword.isBlank()) {
-            return "redirect:/SO_SignUpPage.html?school=" + school + "&error=missing";
+            return "redirect:/SO_SignUpPage.html?error=missing";
         }
 
         if (!password.equals(confirmPassword)) {
-            return "redirect:/SO_SignUpPage.html?school=" + school + "&error=mismatch";
+            return "redirect:/SO_SignUpPage.html?error=mismatch";
         }
 
-        if (!authProvider.isValidSchoolUser(email, school)) {
-            return "redirect:/SO_SignUpPage.html?school=" + school + "&error=domain";
+        if (!authProvider.isValidAppStateUser(email)) {
+            return "redirect:/SO_SignUpPage.html?error=domain";
         }
 
-        return "redirect:/SO_SignOnPage.html?school=" + school + "&signup=success";
+        return "redirect:/SO_SignOnPage.html?signup=success";
     }
 
     @GetMapping("/join-session")
@@ -200,30 +195,5 @@ public class HomeController {
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
     }
-
-/*
- * @PostMapping("/login")
- * public String login(
- * 
- * @RequestParam String username,
- * 
- * @RequestParam String password,
- * HttpSession session
- * ) {
- * 
- * if (!username.toLowerCase().endsWith("@appstate.edu")) {
- * return "redirect:/SO_SignOnPage.html?error=true";
- * }
- * 
- * // Store email in session
- * session.setAttribute("userEmail", username);
- * 
- * return "redirect:/SO_DashBoard.html";
- * }
- * 
- * 
- * 
- * 
- */
 
 }

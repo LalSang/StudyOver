@@ -17,7 +17,6 @@ public class AuthSessionFilter extends OncePerRequestFilter {
             "/login",
             "/logout",
             "/signup",
-            "/SO_SelectSchoolPage.html",
             "/SO_SignOnPage.html",
             "/SO_SignUpPage.html",
             "/actions.js",
@@ -49,7 +48,7 @@ public class AuthSessionFilter extends OncePerRequestFilter {
         boolean authenticated = session != null && Boolean.TRUE.equals(session.getAttribute("authenticated"));
 
         if (!authenticated) {
-            response.sendRedirect("/SO_SelectSchoolPage.html?error=auth");
+            response.sendRedirect("/SO_SignOnPage.html?error=auth");
             return;
         }
 
