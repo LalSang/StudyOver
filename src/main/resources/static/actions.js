@@ -11,8 +11,94 @@ const APPSTATE_CONFIG = {
   ]
 };
 
+let currentUserContext = null;
+
 function getQueryParams() {
   return new URLSearchParams(window.location.search);
+}
+
+function normalizeLower(value) {
+  return value ? value.toString().trim().toLowerCase() : '';
+}
+
+function toAppStateEmail(username) {
+  const normalized = username ? username.toString().trim() : '';
+  if (!normalized) {
+    return '';
+  }
+
+  if (/@appstate\.edu$/i.test(normalized)) {
+    return normalized.toLowerCase();
+  }
+
+  const localPart = normalized.split('@')[0] || normalized;
+  return `${localPart}@appstate.edu`.toLowerCase();
+}
+
+async function loadCurrentUserContext() {
+  try {
+    const response = await fetch('/api/me', {
+      headers: {
+        Accept: 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const contentType = response.headers.get('content-type') || '';
+    if (!contentType.includes('application/json')) {
+      return null;
+    }
+
+    const user = await response.json();
+    currentUserContext = user;
+    return user;
+  } catch (error) {
+    console.error('Unable to load current user context:', error);
+    return null;
+  }
+}
+
+function hasAdminAccess() {
+  return normalizeLower(currentUserContext && currentUserContext.role) === 'admin';
+}
+
+function initializeReadOnlyUsernameDisplays() {
+  const username = currentUserContext && currentUserContext.username
+    ? currentUserContext.username.toString().trim()
+    : '';
+
+  const createPostUsernameInput = document.querySelector('#user-name');
+  if (createPostUsernameInput) {
+    if (username) {
+      createPostUsernameInput.value = username;
+    }
+  }
+
+  const createPostDisplayUsername = document.querySelector('#create-post-display-username');
+  if (createPostDisplayUsername) {
+    createPostDisplayUsername.textContent = username;
+  }
+
+  const appStateEmailInput = document.querySelector('#app-state-email');
+  if (appStateEmailInput) {
+    const appStateEmail = toAppStateEmail(username);
+    if (appStateEmail) {
+      appStateEmailInput.value = appStateEmail;
+    }
+  }
+}
+
+function canDeleteSession(session) {
+  if (hasAdminAccess()) {
+    return true;
+  }
+
+  const owner = normalizeLower(session && session.ownerUsername);
+  const currentUsername = normalizeLower(currentUserContext && currentUserContext.username);
+  return owner && currentUsername && owner === currentUsername;
 }
 
 class SchoolFooter {
@@ -75,17 +161,12 @@ function initializeSchoolFooter() {
 }
 
 function applySchoolBranding() {
-  const schoolTitle = `${APPSTATE_CONFIG.name} StudyOver`;
+  const navTitle = 'Appalachian StudyOver';
 
-  const loginTitle = document.querySelector('#school-login-title');
-  if (loginTitle) {
-    loginTitle.textContent = `Welcome to ${schoolTitle}`;
-  }
-
-  const signupTitle = document.querySelector('#school-signup-title');
-  if (signupTitle) {
-    signupTitle.textContent = `Create Your ${schoolTitle} Account`;
-  }
+  const appHeaders = document.querySelectorAll('header h1');
+  appHeaders.forEach((header) => {
+    header.textContent = navTitle;
+  });
 
   const loginLogo = document.querySelector('#school-login-logo');
   if (loginLogo) {
@@ -98,11 +179,6 @@ function applySchoolBranding() {
     signupLogo.src = APPSTATE_CONFIG.logoPath;
     signupLogo.alt = `${APPSTATE_CONFIG.name} logo`;
   }
-
-  const appHeaders = document.querySelectorAll('header h1:not(#school-login-title):not(#school-signup-title)');
-  appHeaders.forEach((header) => {
-    header.textContent = schoolTitle;
-  });
 
   const officialSchoolInfoHeading = document.querySelector('.account-info-section h5');
   if (officialSchoolInfoHeading) {
@@ -327,6 +403,12 @@ function escapeHtml(value) {
 }
 
 function buildSessionCard(session) {
+  const hostUsername = session && session.userName && session.userName.toString().trim()
+    ? session.userName.toString().trim()
+    : 'Unknown';
+  const deleteButtonMarkup = canDeleteSession(session)
+    ? '<button class="delete-session-btn">End Session</button>'
+    : '';
   const card = document.createElement('div');
   card.className = 'session-card';
   card.dataset.sessionId = String(session.id);
@@ -337,28 +419,28 @@ function buildSessionCard(session) {
     </div>
     <div class="session-details">
       <div class="detail-item">
-        <span class="icon">🕐</span>
+        <span class="detail-label">Time:</span>
         <span>${escapeHtml(session.sessionDate)} ${escapeHtml(session.sessionTime)}</span>
       </div>
       <div class="detail-item">
-        <span class="icon">📍</span>
+        <span class="detail-label">Location:</span>
         <span>${escapeHtml(humanizeValue(session.sessionLocation))}</span>
       </div>
       <div class="detail-item">
-        <span class="icon">👥</span>
+        <span class="detail-label">Group:</span>
         <span>1/${escapeHtml(humanizeValue(session.maxParticipants))}</span>
       </div>
       <div class="detail-item">
-        <span class="icon">🎯</span>
-        <span>${escapeHtml(humanizeValue(session.difficultyLevel))} | Host: ${escapeHtml(session.userName)}</span>
+        <span class="detail-label">Host:</span>
+        <span>${escapeHtml(hostUsername)}</span>
       </div>
       <div class="detail-item">
-        <span class="icon">📝</span>
+        <span class="detail-label">Details:</span>
         <span>${escapeHtml(session.sessionDescription)}</span>
       </div>
     </div>
     <div class="session-footer">
-      <button class="delete-session-btn">Delete Session</button>
+      ${deleteButtonMarkup}
       <button class="join-btn">Join Session</button>
     </div>
   `;
@@ -380,29 +462,72 @@ function initializeDeleteSessionButtons() {
     button.dataset.deleteBound = 'true';
     button.addEventListener('click', async function() {
       const sessionCard = button.closest('.session-card');
-      if (!sessionCard || !sessionCard.dataset.sessionId) {
+      if (!sessionCard) {
         return;
       }
 
       const sessionId = sessionCard.dataset.sessionId;
+      if (!sessionId) {
+        // Fallback for static cards that are not backed by an API record.
+        if (hasAdminAccess()) {
+          sessionCard.remove();
+        }
+        return;
+      }
 
       try {
         const response = await fetch(`/api/sessions/${sessionId}`, {
           method: 'DELETE'
         });
 
+        if (response.status === 403) {
+          alert('Only admins or the session creator can end this session.');
+          return;
+        }
+
         if (!response.ok) {
-          alert('Unable to delete session.');
+          alert('Unable to end session.');
           return;
         }
 
         sessionCard.remove();
       } catch (error) {
-        console.error('Unable to delete session:', error);
-        alert('Unable to delete session right now. Try again.');
+        console.error('Unable to end session:', error);
+        alert('Unable to end session right now. Try again.');
       }
     });
   });
+}
+
+function ensureAdminCanEndAllVisibleSessions() {
+  if (!hasAdminAccess()) {
+    return;
+  }
+
+  const sessionCards = document.querySelectorAll('.sessions-grid .session-card');
+  if (!sessionCards.length) {
+    return;
+  }
+
+  sessionCards.forEach((card) => {
+    const footer = card.querySelector('.session-footer');
+    if (!footer) {
+      return;
+    }
+
+    const existingDeleteButton = footer.querySelector('.delete-session-btn');
+    if (existingDeleteButton) {
+      existingDeleteButton.textContent = 'End Session';
+      return;
+    }
+
+    const endButton = document.createElement('button');
+    endButton.className = 'delete-session-btn';
+    endButton.textContent = 'End Session';
+    footer.insertBefore(endButton, footer.firstChild);
+  });
+
+  initializeDeleteSessionButtons();
 }
 
 async function loadCreatedSessions() {
@@ -427,6 +552,7 @@ async function loadCreatedSessions() {
       sessionsGrid.prepend(sessionCard);
     });
 
+    ensureAdminCanEndAllVisibleSessions();
     initializeJoinSessionButtons();
     initializeDeleteSessionButtons();
   } catch (error) {
@@ -443,6 +569,12 @@ function initializeCreatePostForm() {
   createPostForm.addEventListener('submit', async function(event) {
     event.preventDefault();
 
+    const userNameValue = document.querySelector('#user-name').value.trim();
+    if (!userNameValue) {
+      alert('Unable to find your username. Please log out and log back in.');
+      return;
+    }
+
     const sessionDescription = document.querySelector('#session-description').value.trim();
     if (sessionDescription.length < 50) {
       alert('Additional information must be at least 50 characters.');
@@ -450,7 +582,7 @@ function initializeCreatePostForm() {
     }
 
     const payload = {
-      userName: document.querySelector('#user-name').value.trim(),
+      userName: userNameValue,
       topic: document.querySelector('#topic-select').value,
       courseCode: document.querySelector('#course-code').value.trim(),
       sessionTitle: document.querySelector('#session-title').value.trim(),
@@ -486,6 +618,71 @@ function initializeCreatePostForm() {
   });
 }
 
+function initializeAdminControls() {
+  const adminControls = document.querySelector('#admin-controls');
+  if (!adminControls) {
+    return;
+  }
+
+  if (!hasAdminAccess()) {
+    adminControls.classList.remove('visible');
+    return;
+  }
+
+  adminControls.classList.add('visible');
+
+  const createUserForm = document.querySelector('#admin-create-user-form');
+  const statusLabel = document.querySelector('#admin-create-user-status');
+  if (!createUserForm || !statusLabel) {
+    return;
+  }
+
+  const showStatus = (message, color) => {
+    statusLabel.textContent = message;
+    statusLabel.style.color = color || '#b00020';
+  };
+
+  createUserForm.addEventListener('submit', async function(event) {
+    event.preventDefault();
+
+    const username = document.querySelector('#admin-new-username').value.trim();
+    const password = document.querySelector('#admin-new-password').value.trim();
+    const role = document.querySelector('#admin-new-role').value;
+
+    if (!username || !password || !role) {
+      showStatus('Role, username, and password are required.');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          username,
+          password,
+          role
+        })
+      });
+
+      if (!response.ok) {
+        const errorBody = await response.json().catch(() => null);
+        const message = errorBody && errorBody.error ? errorBody.error : 'Unable to create account.';
+        showStatus(message);
+        return;
+      }
+
+      createUserForm.reset();
+      showStatus('User account created.', '#1b5e20');
+    } catch (error) {
+      console.error('Unable to create user account:', error);
+      showStatus('Unable to create account right now. Try again.');
+    }
+  });
+}
+
 function initializeDashboardButtons() {
   const createPostCard = document.querySelector('.small-boxes.left');
   const browseSessionsCard = document.querySelector('.small-boxes.right');
@@ -503,16 +700,25 @@ function initializeDashboardButtons() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
+  const onLoginPage = Boolean(document.querySelector('form.login-form[action="/login"]'));
+  const onSignupPage = Boolean(document.querySelector('#signup-form'));
+  if (!onLoginPage && !onSignupPage) {
+    await loadCurrentUserContext();
+  }
+
   applySchoolBranding();
+  initializeReadOnlyUsernameDisplays();
   initializeSchoolFooter();
   initializeH1Navigation();
   initializeHeaderNavigation();
   initializeLoginForm();
   initializeSignupActions();
+  initializeAdminControls();
   initializeLogoutButtons();
+  ensureAdminCanEndAllVisibleSessions();
   initializeJoinSessionButtons();
   initializeDashboardButtons();
   initializeCreatePostForm();
-  loadCreatedSessions();
+  await loadCreatedSessions();
 });

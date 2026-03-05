@@ -70,7 +70,7 @@
 
 .btn-dashboard {
   display: inline-block;
-  background: linear-gradient(135deg, #007bff 0%, #0056b3 50%, #004085 100%);
+  background-color: #0056b3;
   color: #ffffff;
   text-decoration: none;
   border: none;
@@ -90,7 +90,7 @@
 }
 
 .btn-dashboard:hover {
-  background: linear-gradient(135deg, #0056b3 0%, #004085 50%, #002752 100%);
+  background-color: #00458f;
   transform: translateY(-3px);
   box-shadow:
     0 8px 25px rgba(0, 123, 255, 0.4),
@@ -173,36 +173,33 @@ body {
    ============================================== */
 header {
   width: 100%;
-  padding: 20px;
+  min-height: 72px;
+  padding: 14px 24px;
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  position: relative;
+  background: linear-gradient(135deg, #f4f1e8 0%, #e8ddd4 100%);
+  border-bottom: 1px solid #d4af8c;
+  box-shadow: 0 2px 12px rgba(93, 78, 55, 0.24);
 }
 
 header h1 {
-  background-color: #312929;
-  color: #f5f5dc;
-  padding: 15px 30px;
-  border-radius: 200px;
-  font-weight: 300;
+  color: #654321;
+  font-weight: 700;
   margin: 0;
-  text-shadow:
-    0 0 8px rgba(255, 255, 240, 0.539),
-    0 0 12px rgba(253, 255, 240, 0.571);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: calc(7 / 7 * 100%);
-  font-size: clamp(1.2rem, 3vw, 2rem);
+  font-size: clamp(1rem, 1.6vw, 1.35rem);
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.7);
+}
+
+header h1.universal-hover,
+header h1.universal-hover:hover {
+  box-shadow: none;
 }
 
 /* Profile Icon */
 .profile-icon-container {
-  position: absolute;
-  top: 50%;
-  right: 30px;
-  transform: translateY(-50%);
+  margin-left: auto;
 }
 
 .profile-icon {
@@ -211,26 +208,42 @@ header h1 {
 }
 
 .user-icon {
-  width: 45px;
-  height: 45px;
-  background-color: #312929;
-  color: #ffd700;
+  width: 40px;
+  height: 40px;
+  background-color: #8b4513;
+  color: #fff8e7;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
-  border: 2px solid #8b4513;
+  font-size: 18px;
+  border: 1px solid #d4af8c;
   cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
   transition: all 0.3s ease;
 }
 
 .user-icon:hover {
-  background-color: #8b4513;
-  border-color: #312929;
+  background-color: #a0522d;
+  border-color: #c49b6b;
   transform: scale(1.05);
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.24);
+}
+
+@media (max-width: 768px) {
+  header {
+    min-height: 64px;
+    padding: 12px 16px;
+  }
+
+  header h1 {
+    font-size: 1rem;
+  }
+
+  .user-icon {
+    width: 36px;
+    height: 36px;
+  }
 }
 
 /* ==============================================
@@ -488,23 +501,6 @@ footer {
   overflow: hidden;
 }
 
-.sessions-main-box::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(
-    90deg,
-    #8b4513 0%,
-    #d4af8c 25%,
-    #228b22 50%,
-    #d4af8c 75%,
-    #8b4513 100%
-  );
-}
-
 .filter-header-section {
   text-align: center;
   padding: 20px 0;
@@ -513,26 +509,6 @@ footer {
   background: linear-gradient(135deg, #fff8e7 0%, #f5f0e6 100%);
   border-radius: 10px;
   position: relative;
-}
-
-.filter-header-section::after {
-  content: "🏔️";
-  position: absolute;
-  top: 50%;
-  right: 30px;
-  transform: translateY(-50%);
-  font-size: 1.5rem;
-  opacity: 0.6;
-}
-
-.filter-header-section::before {
-  content: "🏔️";
-  position: absolute;
-  top: 50%;
-  left: 30px;
-  transform: translateY(-50%);
-  font-size: 1.5rem;
-  opacity: 0.6;
 }
 
 .filter-header-section h3 {
@@ -688,24 +664,6 @@ footer {
   cursor: pointer;
 }
 
-.session-card::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(
-    90deg,
-    #8b4513 0%,
-    #228b22 25%,
-    #d4af8c 50%,
-    #228b22 75%,
-    #8b4513 100%
-  );
-  border-radius: 18px 18px 0 0;
-}
-
 .session-card:hover {
   transform: translateY(-4px);
   box-shadow:
@@ -777,6 +735,15 @@ footer {
   text-align: center;
 }
 
+.detail-item .detail-label {
+  min-width: 74px;
+  color: #5d4e37;
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
 .detail-item span:last-child {
   font-weight: 500;
   text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8);
@@ -793,40 +760,41 @@ footer {
 }
 
 .join-btn {
-  background: linear-gradient(135deg, #228b22 0%, #32cd32 50%, #228b22 100%);
+  background-color: #2b8a3e;
   color: #ffffff;
-  border: none;
-  padding: 12px 28px;
-  border-radius: 25px;
-  font-size: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  padding: 11px 24px;
+  border-radius: 12px;
+  font-size: 0.98rem;
   font-weight: 600;
+  letter-spacing: 0.01em;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow:
-    0 4px 12px rgba(34, 139, 34, 0.25),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  transform: perspective(100px) rotateX(5deg);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 8px 18px rgba(24, 92, 45, 0.22);
+  text-shadow: none;
   font-family: "Poppins", sans-serif;
 }
 
 .join-btn:hover {
-  background: linear-gradient(135deg, #32cd32 0%, #40e040 50%, #32cd32 100%);
-  transform: perspective(100px) rotateX(0deg) translateY(-2px);
+  background-color: #247533;
+  transform: translateY(-1px);
+  box-shadow: 0 12px 22px rgba(24, 92, 45, 0.28);
+}
+
+.join-btn:focus-visible {
+  outline: none;
   box-shadow:
-    0 6px 16px rgba(34, 139, 34, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    0 0 0 3px rgba(46, 164, 79, 0.28),
+    0 12px 22px rgba(24, 92, 45, 0.28);
 }
 
 .join-btn:active {
-  transform: perspective(100px) rotateX(8deg) translateY(1px);
-  box-shadow:
-    0 2px 8px rgba(34, 139, 34, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transform: translateY(0);
+  box-shadow: 0 6px 14px rgba(24, 92, 45, 0.2);
 }
 
 .delete-session-btn {
-  background: linear-gradient(135deg, #8b0000 0%, #cc3333 50%, #8b0000 100%);
+  background-color: #b3261e;
   color: #ffffff;
   border: none;
   padding: 12px 18px;
@@ -843,7 +811,7 @@ footer {
 }
 
 .delete-session-btn:hover {
-  background: linear-gradient(135deg, #a00000 0%, #dd4444 50%, #a00000 100%);
+  background-color: #991f19;
   transform: translateY(-2px);
   box-shadow:
     0 6px 16px rgba(139, 0, 0, 0.35),
@@ -1101,7 +1069,7 @@ footer {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #228b22 0%, #32cd32 50%, #228b22 100%);
+  background-color: #2b8a3e;
   color: #ffffff;
   border: none;
   padding: 14px 30px;
@@ -1118,7 +1086,7 @@ footer {
 }
 
 .btn-primary:hover {
-  background: linear-gradient(135deg, #32cd32 0%, #40e040 50%, #32cd32 100%);
+  background-color: #247533;
   transform: translateY(-2px);
   box-shadow:
     0 6px 16px rgba(34, 139, 34, 0.35),
@@ -1126,7 +1094,7 @@ footer {
 }
 
 .btn-secondary {
-  background: linear-gradient(135deg, #8b4513 0%, #a0522d 100%);
+  background-color: #8b4513;
   color: #fff8e7;
   border: none;
   padding: 14px 25px;
@@ -1142,7 +1110,7 @@ footer {
 }
 
 .btn-secondary:hover {
-  background: linear-gradient(135deg, #a0522d 0%, #b8621f 100%);
+  background-color: #7a3d12;
   transform: translateY(-1px);
   box-shadow:
     0 5px 14px rgba(139, 69, 19, 0.3),
@@ -1248,6 +1216,15 @@ footer {
   display: flex;
   flex-direction: column;
   gap: 25px;
+}
+
+.profile-display-username {
+  margin: 0;
+  color: #5d4e37;
+  font-family: "Poppins", sans-serif;
+  font-size: 1.3rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
 }
 
 /* Account Information Sections */
@@ -1406,7 +1383,7 @@ footer {
 /* Account Actions */
 .account-actions {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 30px;
 }
 
@@ -1432,6 +1409,28 @@ footer {
   margin-bottom: 10px;
 }
 
+.admin-controls {
+  display: none;
+}
+
+.admin-controls.visible {
+  display: block;
+}
+
+.admin-create-user-form {
+  margin-top: 4px;
+}
+
+.admin-create-user-form .form-group {
+  margin-bottom: 12px;
+}
+
+.admin-create-user-status {
+  min-height: 20px;
+  margin-top: 8px;
+  text-align: left;
+}
+
 .danger-zone {
   border-color: #d32f2f !important;
   background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%) !important;
@@ -1443,7 +1442,7 @@ footer {
 }
 
 .btn-danger {
-  background: linear-gradient(135deg, #d32f2f 0%, #f44336 100%);
+  background-color: #d32f2f;
   color: #ffffff;
   border: none;
   padding: 12px 20px;
@@ -1460,7 +1459,7 @@ footer {
 }
 
 .btn-danger:hover {
-  background: linear-gradient(135deg, #c62828 0%, #e53935 100%);
+  background-color: #b71c1c;
   transform: translateY(-2px);
   box-shadow:
     0 6px 16px rgba(211, 47, 47, 0.35),

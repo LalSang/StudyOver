@@ -9,7 +9,7 @@
   </head>
   <body>
     <header>
-      <h1>Appalachian State Study Connect</h1>
+      <h1>Appalachian StudyOver</h1>
       <div class="profile-icon-container">
         <a href="SO_ProfilePage.html" class="profile-icon">
           <div class="user-icon">👤</div>
@@ -84,41 +84,6 @@
                   </div>
                 </div>
 
-                <!-- Editable Personal Information -->
-                <div class="personal-info-section">
-                  <h5>
-                    Personal Preferences
-                  </h5>
-
-                  <div class="form-group">
-                    <label for="preferred-name">Preferred Name</label>
-                    <input
-                      type="text"
-                      id="preferred-name"
-                      name="preferred-name"
-                      placeholder="How you'd like others to see your name"
-                      value="Johnny"
-                    />
-                    <small class="help-text"
-                      >This is how your name will appear in study
-                      sessions</small
-                    >
-                  </div>
-
-                  <div class="form-group">
-                    <label for="secondary-email">Secondary Email</label>
-                    <input
-                      type="email"
-                      id="secondary-email"
-                      name="secondary-email"
-                      placeholder="Optional: for backup notifications"
-                      value="john.doe@gmail.com"
-                    />
-                    <small class="help-text"
-                      >Receive notifications at this email as well</small
-                    >
-                  </div>
-                </div>
               </div>
             </div>
           </div>
@@ -301,6 +266,47 @@
                 <button type="button" class="btn-secondary logout-btn">
                   Logout
                 </button>
+              </div>
+
+              <div id="admin-controls" class="action-group admin-controls">
+                <h5>Admin Controls</h5>
+                <form id="admin-create-user-form" class="admin-create-user-form">
+                  <div class="form-group">
+                    <label for="admin-new-username">Username</label>
+                    <input
+                      type="text"
+                      id="admin-new-username"
+                      name="admin-new-username"
+                      placeholder="New account username"
+                      required
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label for="admin-new-password">Password</label>
+                    <input
+                      type="password"
+                      id="admin-new-password"
+                      name="admin-new-password"
+                      placeholder="New account password"
+                      required
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label for="admin-new-role">Role</label>
+                    <select id="admin-new-role" name="admin-new-role" required>
+                      <option value="student">Student</option>
+                      <option value="admin">Admin</option>
+                    </select>
+                  </div>
+                  <button type="submit" class="btn-primary">
+                    Create User Account
+                  </button>
+                  <p
+                    id="admin-create-user-status"
+                    class="login-error admin-create-user-status"
+                    aria-live="polite"
+                  ></p>
+                </form>
               </div>
 
               <div class="action-group danger-zone">

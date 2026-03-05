@@ -2,6 +2,7 @@ package com.Capstone.capstonebackend;
 
 public class StudySession {
     private long id;
+    private String ownerUsername;
     private String userName;
     private String topic;
     private String courseCode;
@@ -18,6 +19,7 @@ public class StudySession {
 
     public StudySession(
             long id,
+            String ownerUsername,
             String userName,
             String topic,
             String courseCode,
@@ -29,6 +31,7 @@ public class StudySession {
             String difficultyLevel,
             String sessionDescription) {
         this.id = id;
+        this.ownerUsername = ownerUsername;
         this.userName = userName;
         this.topic = topic;
         this.courseCode = courseCode;
@@ -47,6 +50,14 @@ public class StudySession {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    public String getOwnerUsername() {
+        return ownerUsername;
+    }
+
+    public void setOwnerUsername(String ownerUsername) {
+        this.ownerUsername = ownerUsername;
     }
 
     public String getUserName() {
